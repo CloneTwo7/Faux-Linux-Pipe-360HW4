@@ -25,6 +25,25 @@ description:
 
 
 int main(int argc, char *argv[]){
-	/* code */
+	int fd[2];
+	int rd = fd[0], wrt = fd[1];
+	if(pipe(fd)) {
+		perror("ERROR");
+		exit(1);
+	}
+
+	/*Builds two argument strings */
+	char arg1[255], arg2[255];
+	int prsIndex = 1;
+	while(strcmp(":", argv[prsIndex])) {
+		strcat(arg1, argv[prsIndex]);
+		prsIndex++;
+	}
+	prsIndex++;
+	while(prsIndex < argc) {
+		strcat(arg2, argv[prsIndex]);
+		prsIndex++;
+	}
+
 	return 0;
 }
