@@ -31,8 +31,8 @@ int main(int argc, char *argv[]){
 	int fd[2];
 	int rdr, wtr; 
 	char buff[255];
-	char *cmd_one, *cmd_one_flags[argc];
-	char *cmd_two, *cmd_two_flags[argc];
+	char *cmd_one[argc];
+	char *cmd_two[argc];
 	//Needs more extensive error checking
 	if(pipe (fd) < 0) {
 		exit(1);
@@ -53,53 +53,27 @@ int main(int argc, char *argv[]){
 			cmdFlag = 1;
 			switchIndex = i;
 		}
-		if(i == 1) {
-			cmd_one = calloc(1, strlen(argv[i])+1);
-			strcpy(cmd_one, argv[i]);
-			strcat(cmd_one, "\0");
-		} else if(i == switchIndex+1 && cmdFlag == 1) {
-			cmd_two = calloc(1, strlen(argv[i])+1);
-			strcpy(cmd_two, argv[i]);
-			strcat(cmd_one, "\0");
-		} if( i > switchIndex && cmdFlag == 1) {
-			cmd_two_flags[cIndexTwo] = calloc(1,strlen(argv[i])+1);
-			strcpy(cmd_two_flags[cIndexTwo], argv[i]);
-			strcat(cmd_two_flags[cIndexTwo], "\0");
+
+		if( i > switchIndex && cmdFlag == 1) {
+			cmd_two[cIndexTwo] = calloc(1,strlen(argv[i])+1);
+			strcpy(cmd_two[cIndexTwo], argv[i]);
+			strcat(cmd_two[cIndexTwo], "\0");
 			cIndexTwo++;
-			cmd_two_flags[cIndexTwo] = NULL;
+			cmd_two[cIndexTwo] = NULL;
 		} else if( cmdFlag != 1) {
-			cmd_one_flags[cIndexOne] = calloc(1,strlen(argv[i])+1);
-			strcpy(cmd_one_flags[cIndexOne], argv[i]);
-			strcat(cmd_one_flags[cIndexOne], "\0");
+			cmd_one[cIndexOne] = calloc(1,strlen(argv[i])+1);
+			strcpy(cmd_one[cIndexOne], argv[i]);
+			strcat(cmd_one[cIndexOne], "\0");
 			cIndexOne++;
-			cmd_one_flags[cIndexOne] = NULL;
+			cmd_one[cIndexOne] = NULL;
 		}
 	}
 
 	if(cmdFlag != 1) {
 		printf("wrong format, please include <arg> : <arg>\n");
 	}
-	printf("command #1: %s\n", cmd_one);
-	for(int i = 0; i < cIndexOne; i++) {
-		printf("- %s\n", cmd_one_flags[i]);
-	}
-	printf("command #2: %s\n", cmd_two);
-	for(int i = 0; i < cIndexTwo; i++) {
-		printf("- %s\n", cmd_two_flags[i]);
-	}
 
-
-	if(fork()) {
-
-	} else {
-
-	}
-
-
-
-
-
-
+	execvp(cmd_one[0], cmd_one);
 
 
 	return 0;
