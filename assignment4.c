@@ -27,8 +27,8 @@ int main(int argc, char *argv[]){
 	int i;
 	int fd[2];
 	int rdr, wtr; 
-	char **cmd_one;
-	char **cmd_two;
+	char **cmd_one = NULL;
+	char **cmd_two = NULL;
 	//Needs more extensive error checking
 	if(pipe (fd) < 0) {
 		perror("Pipe Broken: ");
@@ -41,34 +41,35 @@ int main(int argc, char *argv[]){
 		if(strcmp(argv[i], ":") == 0) {
 			argv[i] = '\0';
 			cmdFlag = 1;
-			cmd_two = &argv[i+1];
+			if(i + 1 < argc) {
+				cmd_two = &argv[i+1];
+			}
 			break;
 		}
 	}
 
 	/* Parent process handles the right side of the command*/
 	if(fork()) {
-		if( cmdFlag != 1) {
+		if( cmd_two == NULL) {
 			wait(NULL);
 			exit(1);
 		}
 		close(wtr);
 		close(0); dup(rdr); close(rdr);
 		if(execvp(cmd_two[0], cmd_two) == -1) {
-			exit(0);
+			perror("");
 		}
 		exit(1);
 	} 
 	/* Child process handles the left side of the command*/
 	else {
-		if (close(rdr) == -1) {
-			perror("Cannot close file descriptor");
-		}
-		if(cmdFlag == 1) {
+		close(rdr) == -1;
+		
+		if(cmd_two != NULL) {
 			close(1); dup(wtr); close(wtr);
 		}
 		if( execvp(cmd_one[0], cmd_one) == -1) {
-			exit(0);
+			perror("");
 		}
 		exit(0);
 	}
