@@ -39,11 +39,9 @@ int main(int argc, char *argv[]){
 	}
 	rdr = fd[0]; wtr = fd[1];
 
-
 	/*I do not like how messy and blocky the following code is
-	 * but it does its job. It creates a string for each command
-	 * as well as an array of strings for each command including
-	 * their flags*/
+	 * but it does its job. It creates an array of strings for 
+	 * each command argument including their flags*/
 	int cmdFlag = 0;
 	int switchIndex = 0;
 	int cIndexOne = 0;
@@ -53,7 +51,6 @@ int main(int argc, char *argv[]){
 			cmdFlag = 1;
 			switchIndex = i;
 		}
-
 		if( i > switchIndex && cmdFlag == 1) {
 			cmd_two[cIndexTwo] = calloc(1,strlen(argv[i])+1);
 			strcpy(cmd_two[cIndexTwo], argv[i]);
@@ -69,12 +66,30 @@ int main(int argc, char *argv[]){
 		}
 	}
 
-	if(cmdFlag != 1) {
-		printf("wrong format, please include <arg> : <arg>\n");
+	/* Parent process handles the right side of the command
+	 * */
+	if(fork()) {
+		close(wtr);
+		close(0); dup(rdr); close(rdr);
+		char *cmd = calloc(1, strlen(cmd_two[0]) + 6);
+		strcat(cmd, "/bin/");
+		strcat(cmd, cmd_two[0]);
+		strcat(cmd,"\0");
+		wait(NULL);
+		execvp(cmd, cmd_two);
+		exit(1);
+		
+	} else { //Child
+		close(rdr);
+		close(1); dup(wtr); close(wtr);
+		//allocate enough space for the cmd plus '/bin/' and null terminator
+		char *cmd = calloc(1, strlen(cmd_one[0]) + 6); 
+		strcat(cmd, "/bin/");
+		strcat(cmd, cmd_one[0]);
+		strcat(cmd, "\0");
+		execvp(cmd, cmd_one);
+		exit(0);
 	}
-
-	execvp(cmd_one[0], cmd_one);
-
 
 	return 0;
 }
