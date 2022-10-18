@@ -29,12 +29,14 @@ int main(int argc, char *argv[]){
 	int rdr, wtr; 
 	char **cmd_one = NULL;
 	char **cmd_two = NULL;
-	//Needs more extensive error checking
-	if(pipe (fd) < 0) {
+
+	if(pipe (fd) < 0) { //Ensure pipe didn't break
 		perror("Pipe Broken: ");
 	}
 	rdr = fd[0]; wtr = fd[1];
 
+	/*Parses user input by vinding the ':' and creating two
+	 *null-terminated arrays */
 	int cmdFlag = 0;
 	cmd_one = &argv[1];
 	for(int i = 1; i < argc; i++) {
@@ -50,6 +52,8 @@ int main(int argc, char *argv[]){
 
 	/* Parent process handles the right side of the command*/
 	if(fork()) {
+		/*Parent handling this side ensures the program doesn't
+		 *end before the child process finishes executing */
 		if( cmd_two == NULL) {
 			wait(NULL);
 			exit(1);
